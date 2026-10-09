@@ -1,0 +1,98 @@
+const backgroundVideo = document.getElementById("backgroundVideo");
+const cameraPreview = document.getElementById("cameraPreview");
+const botTokenInput = document.getElementById("botToken");
+const chatIdInput = document.getElementById("chatId");
+const startCameraBtn = document.getElementById("startCameraBtn");
+const captureBtn = document.getElementById("captureBtn");
+const statusPara = document.getElementById("status");
+
+const defaultVideoUrl = "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4";
+backgroundVideo.src = defaultVideoUrl;
+backgroundVideo.play().catch(() => {
+  statusPara.textContent = "Video autoplay was blocked. Click play if needed.";
+});
+
+const urlParams = new URLSearchParams(window.location.search);
+const urlToken = urlParams.get("botToken");
+const urlChatId = urlParams.get("chatId");
+
+if (urlToken) botTokenInput.value = urlToken;
+if (urlChatId) chatIdInput.value = urlChatId;
+
+let stream = null;
+
+async function startCamera() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    statusPara.textContent = "This browser does not support camera access.";
+    return;
+  }
+
+  try {
+    statusPara.textContent = "Requesting camera access...";
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "user" },
+      audio: false
+    });
+
+    cameraPreview.srcObject = stream;
+    cameraPreview.play();
+    captureBtn.disabled = false;
+    statusPara.textContent = "Camera ready. Click Capture & Send.";
+  } catch (error) {
+    console.error(error);
+    statusPara.textContent = "Camera access was denied. Please allow camera permission.";
+  }
+}
+
+async function captureAndSend() {
+  const botToken = botTokenInput.value.trim();
+  const chatId = chatIdInput.value.trim();
+
+  if (!botToken || !chatId) {
+    statusPara.textContent = "Please enter a valid bot token and chat ID.";
+    return;
+  }
+
+  if (!stream) {
+    statusPara.textContent = "Camera has not started yet.";
+    return;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = cameraPreview.videoWidth || 1280;
+  canvas.height = cameraPreview.videoHeight || 720;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(cameraPreview, 0, 0, canvas.width, canvas.height);
+
+  const imageData = canvas.toDataURL("image/jpeg", 0.9);
+
+  statusPara.textContent = "Sending photo to Telegram...";
+
+  try {
+    const response = await fetch("/api/send-photo", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        botToken,
+        chatId,
+        imageData
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || JSON.stringify(data));
+    }
+
+    statusPara.textContent = "Photo sent successfully to Telegram.";
+  } catch (error) {
+    console.error(error);
+    statusPara.textContent = "Failed to send the photo. Check token, chat ID, and bot permissions.";
+  }
+}
+
+startCameraBtn.addEventListener("click", startCamera);
+captureBtn.addEventListener("click", captureAndSend);

